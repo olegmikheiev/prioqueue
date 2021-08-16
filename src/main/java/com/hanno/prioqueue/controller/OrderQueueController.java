@@ -1,5 +1,6 @@
 package com.hanno.prioqueue.controller;
 
+import com.hanno.prioqueue.RestMapping;
 import com.hanno.prioqueue.dto.OrderDto;
 import com.hanno.prioqueue.entity.ClientOrderState;
 import com.hanno.prioqueue.entity.OrderItem;
@@ -13,12 +14,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -26,7 +25,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
-@RequestMapping("storehouse")
+@RequestMapping(RestMapping.ORDER)
 public class OrderQueueController {
 
     private final OrderQueueService orderQueueService;
@@ -38,30 +37,29 @@ public class OrderQueueController {
         this.mapper = mapper;
     }
 
-    @GetMapping("orders")
+    @GetMapping("all")
     List<OrderDto> getAllOrders() {
         return convertToDto(orderQueueService.getAllOrders());
     }
 
-    @PutMapping("order")
-    @ResponseStatus()
+    @PutMapping
     ResponseEntity<OrderItem> addOrder(@RequestBody OrderDto order) throws InvalidOrderParametersException {
         OrderItem addedOrder = orderQueueService.addOrder(mapper.map(order, OrderItem.class));
         return new ResponseEntity<>(addedOrder, HttpStatus.OK);
     }
 
-    @GetMapping("client/{clientId}/status")
-    ResponseEntity<ClientOrderState> checkClientState(@PathVariable Long clientId) throws InvalidOrderParametersException {
+    @GetMapping("state")
+    ResponseEntity<ClientOrderState> checkClientState(@RequestParam Long clientId) throws InvalidOrderParametersException {
         ClientOrderState orderState = orderQueueService.getClientOrderState(clientId);
         return new ResponseEntity<>(orderState, orderState == null ? HttpStatus.NOT_FOUND : HttpStatus.OK);
     }
 
-    @GetMapping("next-delivery")
+    @GetMapping("delivery")
     List<OrderDto> getNextDelivery() {
         return convertToDto(orderQueueService.getNextDelivery());
     }
 
-    @DeleteMapping("order")
+    @DeleteMapping
     void cancelOrder(@RequestParam Long clientId) throws InvalidOrderParametersException {
         orderQueueService.removeOrder(clientId);
     }
