@@ -2,7 +2,7 @@ package com.hanno.prioqueue.service;
 
 import com.hanno.prioqueue.entity.ClientOrderState;
 import com.hanno.prioqueue.entity.OrderItem;
-import com.hanno.prioqueue.exception.InvalidOrderParametersException;
+import com.hanno.prioqueue.exception.InvalidOrderParameterException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +36,7 @@ public class InMemoryPriorityOrderQueueService implements OrderQueueService {
     private final PriorityQueue<OrderItem> orderQueue = new PriorityQueue<>();
 
     @Override
-    public OrderItem addOrder(@NonNull OrderItem order) throws InvalidOrderParametersException {
+    public OrderItem addOrder(@NonNull OrderItem order) throws InvalidOrderParameterException {
         validateClientId(order.getClientId());
         validateOrderQuantity(order.getQuantity());
         if (orderQueue.stream().anyMatch(o -> order.getClientId().equals(o.getClientId()))) {
@@ -72,7 +72,7 @@ public class InMemoryPriorityOrderQueueService implements OrderQueueService {
     }
 
     @Override
-    public ClientOrderState getClientOrderState(Long clientId) throws InvalidOrderParametersException {
+    public ClientOrderState getClientOrderState(Long clientId) throws InvalidOrderParameterException {
         validateClientId(clientId);
         Iterator<OrderItem> iterator = orderQueue.iterator();
         int clientPosition = 0;
@@ -96,22 +96,22 @@ public class InMemoryPriorityOrderQueueService implements OrderQueueService {
     }
 
     @Override
-    public boolean removeOrder(Long clientId) throws InvalidOrderParametersException {
+    public boolean removeOrder(Long clientId) throws InvalidOrderParameterException {
         validateClientId(clientId);
         return orderQueue.removeIf(o -> clientId.equals(o.getClientId()));
     }
 
-    private void validateClientId(Long clientId) throws InvalidOrderParametersException {
+    private void validateClientId(Long clientId) throws InvalidOrderParameterException {
         if (clientId == null || clientId < 1 || clientId > maxClientId) {
-            throw new InvalidOrderParametersException(String.format(
+            throw new InvalidOrderParameterException(String.format(
                     "Client ID '%d' should be in range [1-%d]", clientId, maxClientId));
         }
     }
 
-    private void validateOrderQuantity(Integer quantity) throws InvalidOrderParametersException {
+    private void validateOrderQuantity(Integer quantity) throws InvalidOrderParameterException {
         // Joe cannot split orders, so order quantity cannot be greater than cart capacity
         if (quantity == null || quantity < 1 || quantity > cartCapacity) {
-            throw new InvalidOrderParametersException(String.format(
+            throw new InvalidOrderParameterException(String.format(
                     "Order quantity '%d', should be in range [1-%d]", quantity, cartCapacity));
         }
     }

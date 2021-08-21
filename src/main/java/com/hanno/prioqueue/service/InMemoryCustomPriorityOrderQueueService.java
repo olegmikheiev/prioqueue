@@ -3,7 +3,7 @@ package com.hanno.prioqueue.service;
 import com.hanno.prioqueue.entity.ClientOrderState;
 import com.hanno.prioqueue.entity.OrderItem;
 import com.hanno.prioqueue.exception.DuplicateClientOrderException;
-import com.hanno.prioqueue.exception.InvalidOrderParametersException;
+import com.hanno.prioqueue.exception.InvalidOrderParameterException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,7 +34,7 @@ public class InMemoryCustomPriorityOrderQueueService implements OrderQueueServic
     private final List<OrderItem> orderQueue = new ArrayList<>();
 
     @Override
-    public OrderItem addOrder(@NonNull OrderItem order) throws InvalidOrderParametersException {
+    public OrderItem addOrder(@NonNull OrderItem order) throws InvalidOrderParameterException {
         validateClientId(order.getClientId());
         validateOrderQuantity(order.getQuantity());
         if (orderQueue.stream().anyMatch(o -> order.getClientId().equals(o.getClientId()))) {
@@ -46,16 +46,6 @@ public class InMemoryCustomPriorityOrderQueueService implements OrderQueueServic
         addOrderBasedOnPriority(order);
         logOrderState();
         return order;
-    }
-
-    private void addOrderBasedOnPriority(OrderItem order) {
-        orderQueue.add(order);
-        for (int i = orderQueue.size() - 1; i > 0; i--) {
-            if (orderQueue.get(i).compareTo(orderQueue.get(i - 1)) > 0) {
-                return;
-            }
-            Collections.swap(orderQueue, i, i - 1);
-        }
     }
 
     @Override
@@ -83,7 +73,7 @@ public class InMemoryCustomPriorityOrderQueueService implements OrderQueueServic
     }
 
     @Override
-    public ClientOrderState getClientOrderState(Long clientId) throws InvalidOrderParametersException {
+    public ClientOrderState getClientOrderState(Long clientId) throws InvalidOrderParameterException {
         validateClientId(clientId);
         Iterator<OrderItem> iterator = orderQueue.iterator();
         int clientPosition = 0;
@@ -107,22 +97,32 @@ public class InMemoryCustomPriorityOrderQueueService implements OrderQueueServic
     }
 
     @Override
-    public boolean removeOrder(Long clientId) throws InvalidOrderParametersException {
+    public boolean removeOrder(Long clientId) throws InvalidOrderParameterException {
         validateClientId(clientId);
         return orderQueue.removeIf(o -> clientId.equals(o.getClientId()));
     }
 
-    private void validateClientId(Long clientId) throws InvalidOrderParametersException {
+    private void addOrderBasedOnPriority(OrderItem order) {
+        orderQueue.add(order);
+        for (int i = orderQueue.size() - 1; i > 0; i--) {
+            if (orderQueue.get(i).compareTo(orderQueue.get(i - 1)) > 0) {
+                return;
+            }
+            Collections.swap(orderQueue, i, i - 1);
+        }
+    }
+
+    private void validateClientId(Long clientId) throws InvalidOrderParameterException {
         if (clientId == null || clientId < 1 || clientId > maxClientId) {
-            throw new InvalidOrderParametersException(String.format(
+            throw new InvalidOrderParameterException(String.format(
                     "Client ID '%d' should be in range [1-%d]", clientId, maxClientId));
         }
     }
 
-    private void validateOrderQuantity(Integer quantity) throws InvalidOrderParametersException {
+    private void validateOrderQuantity(Integer quantity) throws InvalidOrderParameterException {
         // Joe cannot split orders, so order quantity cannot be greater than cart capacity
         if (quantity == null || quantity < 1 || quantity > cartCapacity) {
-            throw new InvalidOrderParametersException(String.format(
+            throw new InvalidOrderParameterException(String.format(
                     "Order quantity '%d', should be in range [1-%d]", quantity, cartCapacity));
         }
     }

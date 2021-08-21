@@ -4,9 +4,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-public class InvalidOrderParametersException extends Exception {
+public class InvalidOrderParameterException extends Exception {
 
-    public InvalidOrderParametersException(String message) {
+    public InvalidOrderParameterException(String message) {
         super(message);
     }
 

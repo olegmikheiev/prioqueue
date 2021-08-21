@@ -4,7 +4,7 @@ import com.hanno.prioqueue.RestMapping;
 import com.hanno.prioqueue.dto.OrderDto;
 import com.hanno.prioqueue.entity.ClientOrderState;
 import com.hanno.prioqueue.entity.OrderItem;
-import com.hanno.prioqueue.exception.InvalidOrderParametersException;
+import com.hanno.prioqueue.exception.InvalidOrderParameterException;
 import com.hanno.prioqueue.service.OrderQueueService;
 import lombok.extern.slf4j.Slf4j;
 import org.dozer.Mapper;
@@ -43,13 +43,13 @@ public class OrderQueueController {
     }
 
     @PutMapping
-    ResponseEntity<OrderItem> addOrder(@RequestBody OrderDto order) throws InvalidOrderParametersException {
+    ResponseEntity<OrderItem> addOrder(@RequestBody OrderDto order) throws InvalidOrderParameterException {
         OrderItem addedOrder = orderQueueService.addOrder(mapper.map(order, OrderItem.class));
         return new ResponseEntity<>(addedOrder, HttpStatus.OK);
     }
 
     @GetMapping("state")
-    ResponseEntity<ClientOrderState> checkClientState(@RequestParam Long clientId) throws InvalidOrderParametersException {
+    ResponseEntity<ClientOrderState> checkClientState(@RequestParam Long clientId) throws InvalidOrderParameterException {
         ClientOrderState orderState = orderQueueService.getClientOrderState(clientId);
         return new ResponseEntity<>(orderState, orderState == null ? HttpStatus.NOT_FOUND : HttpStatus.OK);
     }
@@ -60,7 +60,7 @@ public class OrderQueueController {
     }
 
     @DeleteMapping
-    void cancelOrder(@RequestParam Long clientId) throws InvalidOrderParametersException {
+    void cancelOrder(@RequestParam Long clientId) throws InvalidOrderParameterException {
         orderQueueService.removeOrder(clientId);
     }
 

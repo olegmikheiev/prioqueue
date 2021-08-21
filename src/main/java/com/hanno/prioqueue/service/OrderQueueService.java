@@ -2,7 +2,7 @@ package com.hanno.prioqueue.service;
 
 import com.hanno.prioqueue.entity.ClientOrderState;
 import com.hanno.prioqueue.entity.OrderItem;
-import com.hanno.prioqueue.exception.InvalidOrderParametersException;
+import com.hanno.prioqueue.exception.InvalidOrderParameterException;
 
 import java.util.List;
 
@@ -13,9 +13,9 @@ public interface OrderQueueService {
      *
      * @param order order item to be added
      * @return true if order has been added, otherwise false
-     * @throws InvalidOrderParametersException if order data is invalid
+     * @throws InvalidOrderParameterException if order data is invalid
      */
-    OrderItem addOrder(OrderItem order) throws InvalidOrderParametersException;
+    OrderItem addOrder(OrderItem order) throws InvalidOrderParameterException;
 
     /**
      * Retrieve all the orders from the queue
@@ -36,17 +36,17 @@ public interface OrderQueueService {
      *
      * @param clientId ID of the client to retrieve data
      * @return Client's position and approximate wait time in minutes
-     * @throws InvalidOrderParametersException if client ID is invalid
+     * @throws InvalidOrderParameterException if client ID is invalid
      */
-    ClientOrderState getClientOrderState(Long clientId) throws InvalidOrderParametersException;
+    ClientOrderState getClientOrderState(Long clientId) throws InvalidOrderParameterException;
 
     /**
      * Remove order from the queue by request ID
      *
      * @param clientId ID of the client to remove order
      * @return true if order has been removed, otherwise false
-     * @throws InvalidOrderParametersException if client ID is invalid
+     * @throws InvalidOrderParameterException if client ID is invalid
      */
-    boolean removeOrder(Long clientId) throws InvalidOrderParametersException;
+    boolean removeOrder(Long clientId) throws InvalidOrderParameterException;
 
 }
